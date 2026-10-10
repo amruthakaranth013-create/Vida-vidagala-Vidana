@@ -2,292 +2,103 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="theme-color" content="#f97316">
-<title>Vida Vidagala Vidana ❤️</title>
-<style>
-:root{--orange:#f97316;--cream:#fff8ef;--ink:#34251f}
-*{box-sizing:border-box}
-body{margin:0;font-family:Arial,sans-serif;background:var(--cream);color:var(--ink)}
-header{background:linear-gradient(135deg,#f97316,#ea580c);color:white;padding:25px 18px 30px;border-radius:0 0 26px 26px}
-.top{display:flex;align-items:center;justify-content:space-between;gap:8px}
-.logo{font-size:24px;font-weight:800}
-.tag{margin-top:8px;font-size:14px}
-select,button,input{font:inherit}
-select{padding:9px;border:0;border-radius:10px}
-main{max-width:900px;margin:auto;padding:18px}
-h2{margin:22px 0 12px}
-.search{display:flex;gap:8px;margin-top:20px}
-input{min-width:0;flex:1;padding:14px;border:1px solid #ead9c8;border-radius:13px;background:white}
-button{border:0;border-radius:12px;padding:12px 16px;background:var(--orange);color:white;font-weight:bold;cursor:pointer}
-.chips{display:flex;gap:8px;flex-wrap:wrap;margin:14px 0}
-.chips button{background:#ffead5;color:#7c2d12}
-.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:14px}
-.card{background:white;border-radius:16px;overflow:hidden;box-shadow:0 3px 12px #4a29100c;cursor:pointer}
-.card img{width:100%;aspect-ratio:1.2;object-fit:cover;background:#f1e4d7}
-.card h3{font-size:15px;margin:10px}
-.card p{font-size:12px;margin:0 10px 12px;color:#80675b}
-#message{padding:10px 0;color:#805d4c}
-#details{background:white;border-radius:18px;padding:16px;margin-top:20px}
-#details img{width:100%;max-height:300px;object-fit:cover;border-radius:14px}
-#details li{margin:9px 0;line-height:1.5}
-.hidden{display:none}
-footer{text-align:center;padding:28px 10px;color:#80675b;font-size:13px}
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vida Vidagala Vidana 🍲</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #fff8ef;
+      text-align: center;
+      padding: 25px 15px;
+      color: #492b1d;
+    }
+    h1 { color: #e85d04; }
+    input {
+      width: 65%;
+      padding: 12px;
+      border: 1px solid #ddd;
+      border-radius: 10px;
+    }
+    button {
+      padding: 12px;
+      background: #e85d04;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+    }
+    #result { margin-top: 25px; }
+  </style>
 </head>
 <body>
-<header>
-  <div class="top">
-    <div class="logo">🍲 Vida Vidagala Vidana</div>
-    <select id="language" aria-label="Language">
-      <option value="en">English</option>
-      <option value="kn">ಕನ್ನಡ</option>
-    </select>
-  </div>
-  <div class="tag" id="tagline">Search it. Cook it. Love it! ❤️</div>
-  <div class="search">
-    <input id="query" placeholder="Search palav, pasta, pizza..." />
-    <button id="searchBtn" onclick="searchMeals()">Search</button>
-  </div>
-</header>
+  <h1>🍲 Vida Vidagala Vidana</h1>
+  <p>Search it. Cook it. Love it! ❤️</p>
 
-<main>
-  <h2 id="popular">🍽️ Explore recipes</h2>
-  <div class="chips">
-    <button onclick="quickSearch('pasta')">🍝 Italian</button>
-    <button onclick="quickSearch('tacos')">🌮 Mexican</button>
-    <button onclick="quickSearch('curry')">🍛 Indian</button>
-    <button onclick="quickSearch('chicken')">🍗 Chicken</button>
-    <button onclick="quickSearch('cake')">🍰 Desserts</button>
-    <button onclick="quickSearch('palav')">🍚 Palav</button>
-  </div>
-  <div id="message">Loading delicious ideas...</div>
-  <div id="results" class="grid"></div>
-  <section id="details" class="hidden"></section>
-</main>
-<footer>Made with ❤️ by Amrutha<br>Vida Vidagala Vidana · Recipe discovery</footer>
+  <input id="food" placeholder="Search any food...">
+  <button onclick="searchFood()">Search</button>
 
-<script>
-const API = "https://www.themealdb.com/api/json/v1/1/";
-const $ = id => document.getElementById(id);
-let language = "en";
+  <div id="result"></div>
 
-const words = {
- en: {
-  tagline:"Search it. Cook it. Love it! ❤️",
-  search:"Search", placeholder:"Search palav, pasta, pizza...",
-  popular:"🍽️ Explore recipes", loading:"Finding delicious recipes...",
-  none:"No online recipes found. Try another dish.",
-  error:"Couldn't load recipes. Check your internet and try again.",
-  ingredients:"🥕 Ingredients", instructions:"👩‍🍳 How to make it",
-  back:"← Back to recipes", servings:"Measurements are as listed in the recipe.",
-  palav:"Vegetable Palav", intro:"A simple homemade vegetable palav.",
-  steps:["Wash the rice. Chop the vegetables and onion.",
-  "Heat oil or ghee in a pot. Add spices, onion, ginger and garlic.",
-  "Add the vegetables and mint. Stir for a few minutes.",
-  "Add rice, water and salt. Mix gently.",
-  "Cover and cook until the rice is tender. Rest for 5 minutes and serve hot."],
-  items:["1 cup rice","1 onion, sliced","1 cup mixed vegetables",
-  "1 tbsp oil or ghee","1 tsp ginger-garlic paste","Whole spices",
-  "Mint leaves","2 cups water (adjust as needed)","Salt to taste"]
- },
- kn: {
-  tagline:"ಹುಡುಕಿ. ಅಡುಗೆ ಮಾಡಿ. ಆನಂದಿಸಿ! ❤️",
-  search:"ಹುಡುಕಿ", placeholder:"ಪಲಾವ್, ಪಾಸ್ತಾ, ಪಿಜ್ಜಾ ಹುಡುಕಿ...",
-  popular:"🍽️ ರೆಸಿಪಿಗಳನ್ನು ಅನ್ವೇಷಿಸಿ", loading:"ರೆಸಿಪಿಗಳನ್ನು ಹುಡುಕಲಾಗುತ್ತಿದೆ...",
-  none:"ರೆಸಿಪಿ ಸಿಗಲಿಲ್ಲ. ಬೇರೆ ಖಾದ್ಯ ಹುಡುಕಿ.",
-  error:"ರೆಸಿಪಿ ಲೋಡ್ ಆಗಲಿಲ್ಲ. ಇಂಟರ್ನೆಟ್ ಪರಿಶೀಲಿಸಿ.",
-  ingredients:"🥕 ಬೇಕಾಗುವ ಪದಾರ್ಥಗಳು", instructions:"👩‍🍳 ಮಾಡುವ ವಿಧಾನ",
-  back:"← ರೆಸಿಪಿಗಳಿಗೆ ಹಿಂತಿರುಗಿ", servings:"ಪ್ರಮಾಣವನ್ನು ನಿಮ್ಮ ಅಗತ್ಯಕ್ಕೆ ತಕ್ಕಂತೆ ಹೊಂದಿಸಿ.",
-  palav:"ತರಕಾರಿ ಪಲಾವ್", intro:"ಮನೆಯಲ್ಲಿ ಸುಲಭವಾಗಿ ಮಾಡುವ ತರಕಾರಿ ಪಲಾವ್.",
-  steps:["ಅಕ್ಕಿಯನ್ನು ತೊಳೆದುಕೊಳ್ಳಿ. ತರಕಾರಿಗಳು ಮತ್ತು ಈರುಳ್ಳಿಯನ್ನು ಹೆಚ್ಚಿಕೊಳ್ಳಿ.",
-  "ಪಾತ್ರೆಯಲ್ಲಿ ಎಣ್ಣೆ ಅಥವಾ ತುಪ್ಪ ಬಿಸಿ ಮಾಡಿ. ಮಸಾಲೆ, ಈರುಳ್ಳಿ, ಶುಂಠಿ ಮತ್ತು ಬೆಳ್ಳುಳ್ಳಿ ಹಾಕಿ.",
-  "ತರಕಾರಿಗಳು ಮತ್ತು ಪುದೀನ ಸೇರಿಸಿ ಕೆಲವು ನಿಮಿಷ ಹುರಿಯಿರಿ.",
-  "ಅಕ್ಕಿ, ನೀರು ಮತ್ತು ಉಪ್ಪು ಸೇರಿಸಿ ನಿಧಾನವಾಗಿ ಬೆರೆಸಿ.",
-  "ಮುಚ್ಚಿ ಅಕ್ಕಿ ಬೇಯುವವರೆಗೆ ಬೇಯಿಸಿ. 5 ನಿಮಿಷ ಬಿಟ್ಟು ಬಿಸಿಯಾಗಿ ಬಡಿಸಿ."],
-  items:["1 ಕಪ್ ಅಕ್ಕಿ","1 ಈರುಳ್ಳಿ, ಹೆಚ್ಚಿದ್ದು","1 ಕಪ್ ಮಿಶ್ರ ತರಕಾರಿಗಳು",
-  "1 ಚಮಚ ಎಣ್ಣೆ ಅಥವಾ ತುಪ್ಪ","1 ಚಮಚ ಶುಂಠಿ-ಬೆಳ್ಳುಳ್ಳಿ ಪೇಸ್ಟ್",
-  "ಪೂರ್ತಿ ಮಸಾಲೆಗಳು","ಪುದೀನ ಎಲೆಗಳು","2 ಕಪ್ ನೀರು (ಅಗತ್ಯಕ್ಕೆ ತಕ್ಕಂತೆ)","ರುಚಿಗೆ ಉಪ್ಪು"]
- }
-};
+  <script>
+    async function searchFood() {
+      const food = document.getElementById("food").value.trim();
+      const result = document.getElementById("result");
 
-$("language").addEventListener("change", () => {
- language = $("language").value;
- const w = words[language];
- $("tagline").textContent = w.tagline;
- $("query").placeholder = w.placeholder;
- $("searchBtn").textContent = w.search;
- $("popular").textContent = w.popular;
-});
+      if (!food) {
+        result.textContent = "Please enter a food name!";
+        return;
+      }
 
-$("query").addEventListener("keydown", e => {
- if(e.key === "Enter") searchMeals();
-});
+      result.textContent = "Searching recipes... 🍳";
 
-function quickSearch(name) {
- $("query").value = name;
- searchMeals();
-}
+      try {
+        const url =
+          "https://www.themealdb.com/api/json/v1/1/search.php?s=" +
+          encodeURIComponent(food);
 
-function localPalav() {
- return {
-  idMeal:"local-palav",
-  strMeal: words[language].palav,
-  strMealThumb:"https://images.unsplash.com/photo-1512058564366-18510be2db19?auto=format&fit=crop&w=700&q=80",
-  local:true
- };
-}
+        const response = await fetch(url);
+        const data = await response.json();
 
-function renderCards(meals) {
- $("results").innerHTML = "";
- meals.forEach(meal => {
-  const card = document.createElement("article");
-  card.className = "card";
-  const img = document.createElement("img");
-  img.src = meal.strMealThumb || "";
-  img.alt = meal.strMeal || "Recipe";
-  img.loading = "lazy";
-  const title = document.createElement("h3");
-  title.textContent = meal.strMeal;
-  const hint = document.createElement("p");
-  hint.textContent = language === "kn" ? "ವಿವರಗಳನ್ನು ನೋಡಲು ಒತ್ತಿ" : "Tap to view recipe";
-  card.append(img,title,hint);
-  card.onclick = () => showMeal(meal.idMeal);
-  $("results").appendChild(card);
- });
-}
+        result.innerHTML = "";
 
-async function searchMeals() {
- const q = $("query").value.trim();
- if(!q) {
-  $("message").textContent = language === "kn"
-   ? "ಮೊದಲು ಖಾದ್ಯದ ಹೆಸರನ್ನು ನಮೂದಿಸಿ." : "Please enter a dish name first.";
-  return;
- }
- $("message").textContent = words[language].loading;
- $("results").innerHTML = "";
- $("details").classList.add("hidden");
- try {
-  const response = await fetch(API + "search.php?s=" + encodeURIComponent(q));
-  if(!response.ok) throw new Error("API request failed");
-  const data = await response.json();
-  let meals = data.meals || [];
+        if (!data.meals) {
+          result.textContent =
+            "No recipe found. Try another food!";
+          return;
+        }
 
-  if(/palav|pulao|pulav/i.test(q) &&
-     !meals.some(m => /pulao|pilaf/i.test(m.strMeal))) {
-    meals = [localPalav(), ...meals];
-  }
+        data.meals.forEach(meal => {
+          const card = document.createElement("div");
+          card.style.margin = "20px auto";
+          card.style.padding = "15px";
+          card.style.background = "white";
+          card.style.borderRadius = "15px";
+          card.style.maxWidth = "400px";
 
-  if(!meals.length) {
-   $("message").textContent = words[language].none;
-   return;
-  }
-  $("message").textContent = language === "kn"
-   ? "ಸಿಕ್ಕ ರೆಸಿಪಿಗಳು: " + meals.length
-   : "Recipes found: " + meals.length;
-  renderCards(meals);
- } catch(error) {
-  $("message").textContent = words[language].error;
- }
-}
+          const title = document.createElement("h2");
+          title.textContent = meal.strMeal;
 
-async function showMeal(id) {
- const box = $("details");
- box.classList.remove("hidden");
- box.innerHTML = "";
- box.scrollIntoView({behavior:"smooth",block:"start"});
+          const image = document.createElement("img");
+          image.src = meal.strMealThumb;
+          image.alt = meal.strMeal;
+          image.style.width = "100%";
+          image.style.borderRadius = "12px";
 
- if(id === "local-palav") {
-  showLocalPalav(box);
-  return;
- }
+          const recipe = document.createElement("button");
+          recipe.textContent = "View Recipe";
+          recipe.onclick = () => {
+            window.open(meal.strSource || meal.strYoutube || "#", "_blank");
+          };
 
- box.textContent = words[language].loading;
- try {
-  const response = await fetch(API + "lookup.php?i=" + encodeURIComponent(id));
-  if(!response.ok) throw new Error("Request failed");
-  const data = await response.json();
-  if(!data.meals || !data.meals.length) throw new Error("No recipe");
-  const meal = data.meals[0];
-  const title = document.createElement("h2");
-  title.textContent = meal.strMeal;
-  const img = document.createElement("img");
-  img.src = meal.strMealThumb;
-  img.alt = meal.strMeal;
-  const ingredientsTitle = document.createElement("h3");
-  ingredientsTitle.textContent = words[language].ingredients;
-  const list = document.createElement("ul");
-  for(let i=1;i<=20;i++) {
-   const ingredient = meal["strIngredient"+i];
-   const measure = meal["strMeasure"+i];
-   if(ingredient && ingredient.trim()) {
-    const li = document.createElement("li");
-    li.textContent = [measure,ingredient].filter(Boolean).join(" ");
-    list.appendChild(li);
-   }
-  }
-  const instructionsTitle = document.createElement("h3");
-  instructionsTitle.textContent = words[language].instructions;
-  const instructions = document.createElement("p");
-  instructions.style.lineHeight = "1.7";
-  instructions.textContent = meal.strInstructions ||
-   "Instructions are not available for this recipe.";
-  const back = document.createElement("button");
-  back.textContent = words[language].back;
-  back.onclick = () => box.classList.add("hidden");
-  box.replaceChildren(title,img,ingredientsTitle,list,instructionsTitle,instructions);
-  if(meal.strSource) {
-   const source = document.createElement("p");
-   const link = document.createElement("a");
-   link.href = meal.strSource;
-   link.target = "_blank";
-   link.rel = "noopener";
-   link.textContent = "Original recipe source";
-   source.appendChild(link);
-   box.appendChild(source);
-  }
-  box.appendChild(back);
- } catch(error) {
-  box.textContent = words[language].error;
- }
-}
-
-function showLocalPalav(box) {
- const w = words[language];
- const title = document.createElement("h2");
- title.textContent = w.palav;
- const intro = document.createElement("p");
- intro.textContent = w.intro;
- const ingredientsTitle = document.createElement("h3");
- ingredientsTitle.textContent = w.ingredients;
- const list = document.createElement("ul");
- w.items.forEach(item => {
-  const li = document.createElement("li");
-  li.textContent = item;
-  list.appendChild(li);
- });
- const stepsTitle = document.createElement("h3");
- stepsTitle.textContent = w.instructions;
- const steps = document.createElement("ol");
- w.steps.forEach(step => {
-  const li = document.createElement("li");
-  li.textContent = step;
-  steps.appendChild(li);
- });
- const note = document.createElement("p");
- note.textContent = w.servings;
- const back = document.createElement("button");
- back.textContent = w.back;
- back.onclick = () => box.classList.add("hidden");
- box.replaceChildren(title,intro,ingredientsTitle,list,stepsTitle,steps,note,back);
-}
-
-searchMealsInitial();
-async function searchMealsInitial() {
- $("query").value = "pasta";
- await searchMeals();
-}
-</script>
+          card.append(title, image, recipe);
+          result.appendChild(card);
+        });
+      } catch (error) {
+        result.textContent =
+          "Connection problem. Please check your internet.";
+      }
+    }
+  </script>
 </body>
 </html>
